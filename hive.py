@@ -68,11 +68,15 @@ class Hive:
         if self.nodes is None:
             self.nodes = self.make_get(self.NODE_API)['nodes']
     def set_to_schedule(self,node):
+        if node is None:
+            print("node not provided, you could try and use get_nodes to identify the node id yourself and place it in the class definition")
         json = self.construct_json("node",{"activeScheduleLock":False})
         api_element_list = [self.NODE_API,node]
         for x in range(2): # Send twice as observed a bit of hit and miss
             self.make_put(api_element_list,json)
     def set_boost(self,node,duration = False,temp = False):
+        if node is None:
+            print("node not provided, you could try and use get_nodes to identify the node id yourself and place it in the class definition")
         if not duration:
             duration = self.DEFAULT_BOOST_DURATION
         params = {"activeHeatCoolMode":"BOOST","activeScheduleLock":True,"scheduleLockDuration":duration}
