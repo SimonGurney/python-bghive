@@ -1,6 +1,8 @@
-import requests
+import urllib.request
+import json
 
 class Hive:
+    ENCODING = "utf-8"
     API_BASE_URL = "https://api-prod.bgchprod.info/omnia"
     AUTH_API = "auth/sessions"
     NODE_API = "nodes"
@@ -39,18 +41,29 @@ class Hive:
         if purpose == "node":
             j = {"nodes":[{"attributes":dict}]}
         return j
+    def bytes_to_json(self,bytes):
+        return json.loads(bytes.decode(self.ENCODING))
+    def json_to_bytes(self,dict):
+        return json.dumps(dict).encode(self.ENCODING)
     def make_post(self, api_path, json):
         url = self.build_url(api_path)
-        r = requests.post(url=url,json=json,headers=self.__headers)
-        return r.json()
+        json = self.json_to_bytes(json)
+        req = urllib.request.Request(url,data=json,headers=self.__headers)
+        response = urllib.request.urlopen(req)
+        return self.bytes_to_json(response.read()) 
     def make_get(self, api_path):
         url = self.build_url(api_path)
-        r = requests.get(url=url,headers=self.__headers)
-        return r.json()
+        req = urllib.request.Request(url,headers=self.__headers)
+        req.get_method = lambda: 'GET'
+        response = urllib.request.urlopen(req)
+        return self.bytes_to_json(response.read()) 
     def make_put(self, api_element_list, json):
         url = self.build_url(api_element_list)
-        r = requests.put(url=url, json=json, headers=self.__headers)
-        return r.json()
+        json = self.json_to_bytes(json)
+        req = urllib.request.Request(url,data=json,headers=self.__headers)
+        req.get_method = lambda: 'PUT'
+        response = urllib.request.urlopen(req)
+        return self.bytes_to_json(response.read()) 
     def login_to_hive(self):
         if len(self.__headers) is 4:
             return
