@@ -22,6 +22,7 @@ class Hive:
     nodes = None
     heating_node = None
     water_node = None
+    parent_node = None
 
     def build_url(self,url_parts_ordered):
         buf = self.API_BASE_URL
@@ -99,6 +100,14 @@ class Hive:
             params.update({"activeHeatTemperature":temp})
         json = self.construct_json("node",params)
         self.make_put([self.NODE_API,node],json)
+    def find_parent_node(self):
+        if self.parent_node is not None:
+            return
+        if self.water_node is None:
+            self.find_water_node()
+        for node in self.nodes:
+            if node["id"] is self.water_node:
+                self.parent_node = node["parentNodeId"]
     def find_water_node(self):
         if self.water_node is not None:
             return
@@ -112,10 +121,14 @@ class Hive:
         if self.heating_node is not None:
             return
         self.get_nodes()
+        if self.parent_node is None:
+            self.find_parent_node()
         for node in self.nodes:
-            if "activeHeatTemperature" in node["attributes"]:
-                self.heating_node = node["id"]
-                return
+            if node["parentNodeId"] == self.parent_node:
+                if "supportsHotWater" in node["attributes"]:
+                    if node["attributes"]["supportsHotWater"]["reportedValue"] == False:
+                        self.heating_node = node["id"]
+                        return
     def find_nodes(self):
         self.find_water_node()
         self.find_heating_node()
