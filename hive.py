@@ -161,7 +161,7 @@ class Hive:
             return
         self.get_nodes()
         for node in self.nodes:
-            if node['attributes']['nodeType']['reportedValue'] == 'http://alertme.com/schema/json/node.class.colour.tunable.light.json#':
+            if 'attributes' in node and 'nodeType' in node['attributes'] and 'reportedValue' in node['attributes']['nodeType'] and node['attributes']['nodeType']['reportedValue'] == 'http://alertme.com/schema/json/node.class.colour.tunable.light.json#':
                 if self.active_lights_nodes == None:
                     self.active_light_nodes = {}
                 self.active_light_nodes.update({node['name']:ActiveLight(node)})#.append(ActiveLight(node))
